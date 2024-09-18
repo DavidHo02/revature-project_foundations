@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { logger } = require('../util/logger');
 
-const { registerUser } = require('../userFunctions');
+const { registerUser, login } = require('../userFunctions');
 
 router.route('/register')
     .get(function (req, res, next) {
@@ -29,6 +29,7 @@ router.route('/register')
                 }
                 
                 res.status(201).send('Registration complete!');
+                return;
             });
     });
 
@@ -37,7 +38,25 @@ router.route('/login')
         res.send('GET request to /login handled');
     })
     .post(function (req, res, next) {
-        res.send('POST request to /login handled');
+        const { username, password } = req.body;
+
+        // check if username or password are empty
+        if(!username || !password) {
+            res.status(400).send('Could not login: username or password is missing!'); // works correctly
+            return;
+        }
+
+        // login returns a promise because it is an async function
+        login(username, password)
+            .then(data => {
+                if(!data) {
+                    res.status(400).send('Could not login: invalid credentials!');
+                    return;
+                }
+
+                res.status(201).send(`Login complete! Logged in as ${data}`);
+                return;
+            });
     });
 
 module.exports = router;

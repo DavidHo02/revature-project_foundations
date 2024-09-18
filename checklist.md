@@ -1,1 +1,3 @@
-implemented /register without error checking
+implemented /register
+
+implemented /login
