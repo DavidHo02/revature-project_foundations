@@ -33,7 +33,6 @@ async function createUser(/* OBJECT */ User) {
     }
 }
 
-// TODO:
 async function queryUserByUsername(username) {
     const command = new QueryCommand({
         TableName,

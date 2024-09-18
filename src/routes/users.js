@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
+const { logger } = require('../util/logger');
+
 const { registerUser } = require('../userFunctions');
 
 router.route('/register')
@@ -9,8 +11,25 @@ router.route('/register')
     })
     .post(function (req, res, next) {
         const { username, password } = req.body;
-        registerUser(username, password);
-        res.send('POST request to /register handled');
+
+        // check if username or password are empty
+        if(!username || !password) {
+            res.status(400).send('Could not register: username or password is missing!');
+            return;
+        }
+
+        // registerUser returns a promise because it is an async function
+        registerUser(username, password)
+            .then((data) => {
+                // console.log(data);
+                // check if data is false
+                if(!data) {
+                    res.status(400).send('Could not register: username is already taken!');
+                    return;
+                }
+                
+                res.status(201).send('Registration complete!');
+            });
     });
 
 router.route('/login')
