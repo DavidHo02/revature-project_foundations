@@ -3,7 +3,12 @@ const app = express();
 const path = require('path');
 
 const { logger } = require('./util/logger');
+
+const { User } = require('./models/user');
+
 const userRoutes = require('./routes/users');
+
+app.use(express.json()) // for parsing application/json
 
 const PORT = 3000;
 
@@ -18,5 +23,5 @@ app.post('/register', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    logger.info(`Server listening on port: ${PORT}`);
+    logger.info(`Server is listening on http://localhost:${PORT}`);
 })

@@ -1,0 +1,1 @@
+implemented /register without error checking
