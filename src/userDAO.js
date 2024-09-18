@@ -1,4 +1,4 @@
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient, QueryCommand } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
 const { unmarshall } = require('@aws-sdk/util-dynamodb'); // used to convert from DynamoDB JSON format to regular JSON format
 
@@ -33,6 +33,30 @@ async function createUser(/* OBJECT */ User) {
     }
 }
 
+// TODO:
+async function queryUserByUsername(username) {
+    const command = new QueryCommand({
+        TableName,
+        IndexName: 'username-join_date-index',
+        KeyConditionExpression: '#username = :u',
+        ExpressionAttributeNames: { '#username': 'username' },
+        ExpressionAttributeValues: { ':u': {S: username} }
+    });
+
+    try {
+        const data = await documentClient.send(command);
+        // check if username exists in the database
+        if(data.Items.length === 0) {
+            return false; // username does not exist already
+        }
+
+        return unmarshall(data.Items[0]); // username exists already
+    } catch(err) {
+        console.error(err);
+    }
+}
+
 module.exports = {
     createUser,
+    queryUserByUsername,
 }
