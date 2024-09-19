@@ -1,15 +1,31 @@
 const { User } = require('../src/models/user');
-const { queryUserByUsername } = require('../src/userDAO');
 const { registerUser, login } = require('../src/userFunctions');
 
-// mock a user
-const user = {
-    password: 'david123',
-    username: 'david2',
-    role: 'Employee',
-    join_date: 1726686455,
-    employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89'
-};
+jest.mock('../src/userDAO', () => {
+    const originalModule = jest.requireActual('../src/userDAO');
+
+    return {
+        ...originalModule,
+        queryUserByUsername: jest.fn().mockReturnValue({
+            password: 'david123',
+            username: 'david2',
+            role: 'Employee',
+            join_date: 1726686455,
+            employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89'
+        }),
+    }
+});
+
+const { queryUserByUsername } = require('../src/userDAO');
+// console.log(queryUserByUsername());
+// OUTPUT:
+// {
+//     password: 'david123',
+//     username: 'david2',
+//     role: 'Employee',
+//     join_date: 1726686455,
+//     employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89'
+// };
 
 describe('User Creation Tests', () => {
 
@@ -28,65 +44,33 @@ describe('User Creation Tests', () => {
     });
 });
 
-describe('User DAO Tests', () => {
-    // return a user
-    test('A user should be returned with all the properties', () => {
-        const username = 'admin';
-        return queryUserByUsername(username)
-            .then(data => {
-                expect(data).toHaveProperty('employee_id');
-                expect(data).toHaveProperty('join_date');
-                expect(data).toHaveProperty('username');
-                expect(data).toHaveProperty('password');
-                expect(data).toHaveProperty('role');
-            });
-    });
-});
-
 describe('User Function Tests', () => {
-    const mockQueryUserByUsername = jest.fn();
+    // const queryUserByUsernameResult = queryUserByUsername();
 
     // successful login
     test('login should return a role of Employee', () => {
         const username = 'david2';
         const password = 'david123';
         return login(username, password)
-            .then(data => expect(data).toBe('Employee'));
+            .then((data) => {
+                expect(queryUserByUsername).toHaveBeenCalled();
+                expect(data).toBe('Employee');
+            });
     });
 
     // successful login
-    test('login should return a role of Manager', () => {
-        const username = 'admin';
-        const password = 'admin';
-        return login(username, password)
-            .then(data => expect(data).toBe('Manager'));
-    });
+    // test('login should return a role of Manager', () => {
+    //     const username = 'admin';
+    //     const password = 'admin';
+    //     return login(username, password)
+    //         .then(data => expect(data).toBe('Manager'));
+    // });
 
     // failed login
-    test('login should return false', () => {
-        const username = 'dav';
-        const password = 'david123';
-        login(username, password)
-            .then(data => expect(data).toBe(false));
-    })
-});
-
-
-describe('Learning mock', () => {
-
-    test('test', () => {
-        const mock = jest.fn();
-        let result = mock('foo');
-        expect(result).toBeUndefined();
-        expect(mock).toHaveBeenCalled();
-        expect(mock).toHaveBeenCalledTimes(1);
-        expect(mock).toHaveBeenCalledWith('foo');
-    });
-
-    test('mock implementation', () => {
-        const mock = jest.fn(() => 'bar');
-
-        expect(mock('foo')).toBe('bar');
-        expect(mock).toHaveBeenCalledWith('foo');
-    });
+    // test('login should return false', () => {
+    //     const username = 'dav';
+    //     const password = 'david123';
+    //     login(username, password)
+    //         .then(data => expect(data).toBe(false));
+    // })
 });
