@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { submitTicket, getTicketsByStatus } = require('../service/ticketFunctions');
+const { submitTicket, getTicketsByStatus, updateTicketStatus } = require('../service/ticketFunctions');
 
 router.route('/submit')
     .get()
@@ -14,6 +14,24 @@ router.route('/submit')
         }
 
         res.status(201).send('Ticket submitted!');
+        return;
+    })
+
+router.route('/tickets/:ticket_id')
+    .get(function (req, res, next) {
+        // req.params is an object
+        //console.log(req.params);
+        res.status(200).send('GET request handled');
+    })
+    .put(async function (req, res, next) {
+        const updatedTicket = await updateTicketStatus(req);
+
+        if(!updatedTicket) {
+            res.status(400).json({message: 'Could not update ticket\'s status'});
+            return;
+        }
+
+        res.status(202).json(updatedTicket);
         return;
     })
 

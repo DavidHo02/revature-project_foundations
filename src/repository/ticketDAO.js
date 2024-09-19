@@ -2,6 +2,7 @@ const { DynamoDBClient, QueryCommand } = require('@aws-sdk/client-dynamodb');
 const {
     DynamoDBDocumentClient,
     PutCommand,
+    UpdateCommand,
 } = require('@aws-sdk/lib-dynamodb');
 const { unmarshall } = require('@aws-sdk/util-dynamodb'); // used to convert from DynamoDB JSON format to regular JSON format
 
@@ -58,9 +59,75 @@ async function queryTicketsByStatus(status) {
     }
 }
 
+async function getTicketById(ticket_id) {
+    const command = new QueryCommand({
+        TableName,
+        KeyConditionExpression: '#ticket_id = :t_id',
+        ExpressionAttributeNames: { '#ticket_id': 'ticket_id' },
+        ExpressionAttributeValues: { ':t_id': {S: ticket_id} }
+    });
+
+    try {
+        const data = await documentClient.send(command)
+
+        if(data.Items.length === 0) {
+            return null;
+        }
+
+        return unmarshall(data.Items[0]);
+    } catch(err) {
+        logger.error(err);
+    }
+}
+
+async function changeTicketStatus(ticket_id, newStatus) {
+    // check to see if a ticket with ticket_id exists in the DB
+    const ticket = await getTicketById(ticket_id);
+
+    // if it does not exist, EXIT
+    if(!ticket) {
+        // console.log('ticket does not exist');
+        return false;
+    }
+
+    // if it does exist, check if the status is pending
+    // if the status is not pending, EXIT
+    if(ticket.status !== 'pending') {
+        // console.log('ticket\'s status is NOT pending');
+        return false;
+    }
+
+    // if the status is pending, update the ticket's status to newStatus in the DB
+    // TODO: update the ticket's resolver
+    const command = new UpdateCommand({
+        TableName,
+        Key: {
+            'ticket_id': ticket_id,
+            'creation_date': ticket.creation_date
+        },
+        UpdateExpression: 'set #status = :s',
+        ExpressionAttributeNames: {
+            '#status': 'status'
+        },
+        ExpressionAttributeValues: {
+            ':s': newStatus
+        },
+        ReturnValues: 'ALL_NEW'
+    });
+
+    try {
+        const data = await documentClient.send(command);
+        //console.log(`update data: ${data}`)
+        return data.Attributes;
+    } catch(err) {
+        logger.error(err);
+    }
+}
+
 // createTicket(new Ticket('52caac7a-e48f-4587-9eac-c87422f4ba89', 'test', 12.34));
 
 module.exports = {
     createTicket,
-    queryTicketsByStatus
+    queryTicketsByStatus,
+    changeTicketStatus
 }
