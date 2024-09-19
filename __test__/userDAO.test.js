@@ -1,4 +1,4 @@
-const { queryUserByUsername } = require('../src/userDAO');
+const { queryUserByUsername } = require('../src/repository/userDAO');
 
 describe('User DAO Tests', () => {
     // return a user

@@ -1,9 +1,9 @@
 const uuid = require('uuid');
 
-const { logger } = require('../src/util/logger');
+const { logger } = require('../util/logger');
 
-const { User } = require('./models/user');
-const { createUser, queryUserByUsername } = require('./userDAO');
+const { User } = require('../models/user');
+const { createUser, queryUserByUsername } = require('../repository/userDAO');
 
 // working so far
 async function registerUser(username, password) {
@@ -28,15 +28,16 @@ async function registerUser(username, password) {
 
 async function login(username, password) {
     // check that username exists in the database
-    const result = await queryUserByUsername(username);
-    if(!result) {
+    // queryUserByUsername returns false if the username is not in the DB
+    const userObj = await queryUserByUsername(username);
+    if(!userObj) {
         // the username does not exist in the database
         return false;
     }
 
     // now that we know the username exists in the database, check the password
-    if(password === result.password) {
-        return result.role;
+    if(password === userObj.password) {
+        return userObj;
     } else {
         return false;
     }

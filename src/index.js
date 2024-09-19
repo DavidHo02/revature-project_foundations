@@ -1,15 +1,24 @@
 const express = require('express');
+// const bodyParser = require('body-parser');
 const app = express();
 const path = require('path');
 
 const { logger } = require('./util/logger');
 
 const { User } = require('./models/user');
-const userRoutes = require('./routes/users');
-
-app.use(express.json()) // for parsing application/json
+const userRoutes = require('./controller/users');
 
 const PORT = 3000;
+
+// Body parser middleware
+// Lets you parse incoming and outgoing json requests
+app.use(express.json()) // for parsing application/json
+// app.use(express.urlencoded()); // lets you parse URL-encoded form data
+
+app.use((req, res, next) => {
+    logger.info(`Incoming ${req.method} request to ${req.url}`);
+    next();
+});
 
 app.use('/', userRoutes);
 
