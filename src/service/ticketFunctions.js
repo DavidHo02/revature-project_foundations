@@ -3,7 +3,7 @@ const uuid = require('uuid');
 const { logger } = require('../util/logger');
 
 const { Ticket } = require('../models/ticket');
-const { createTicket } = require('../repository/ticketDAO');
+const { createTicket, queryTicketsByStatus } = require('../repository/ticketDAO');
 
 /**
  * PURPOSE:
@@ -25,6 +25,18 @@ async function submitTicket(reqBody) {
     return true;
 }
 
+async function getTicketsByStatus(reqQuery) {
+    const { status } = reqQuery;
+
+    let data = await queryTicketsByStatus(status);
+    if(!data) {
+        return false;
+    }
+
+    return data;
+}
+
 module.exports = {
     submitTicket,
+    getTicketsByStatus
 }

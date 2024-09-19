@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { submitTicket } = require('../service/ticketFunctions');
+const { submitTicket, getTicketsByStatus } = require('../service/ticketFunctions');
 
 router.route('/submit')
     .get()
@@ -14,6 +14,15 @@ router.route('/submit')
         }
 
         res.status(201).send('Ticket submitted!');
+        return;
+    })
+
+router.route('/tickets')
+    .get(async function (req, res, next) {
+        // console.log(req.query);
+        let result = await getTicketsByStatus(req.query);
+
+        res.status(200).json(result);
         return;
     })
 
