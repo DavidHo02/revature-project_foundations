@@ -7,6 +7,7 @@ const { logger } = require('./util/logger');
 
 const { User } = require('./models/user');
 const userRoutes = require('./controller/users');
+const ticketRoutes = require('./controller/tickets');
 
 const PORT = 3000;
 
@@ -21,6 +22,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/', userRoutes);
+app.use('/', ticketRoutes);
 
 app.get('/', (req, res) => {
     res.send('get request handled');

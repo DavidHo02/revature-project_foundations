@@ -5,11 +5,7 @@ const { logger } = require('../util/logger');
 const { User } = require('../models/user');
 const { createUser, queryUserByUsername } = require('../repository/userDAO');
 
-// working so far
 async function registerUser(username, password) {
-    
-    // queryUserByUsername returns a promise
-
     // check if username already exists
     const result = await queryUserByUsername(username);
     // console.log(result);
@@ -47,5 +43,3 @@ module.exports = {
     registerUser,
     login
 }
-
-// registerUser('david', 'test123');
