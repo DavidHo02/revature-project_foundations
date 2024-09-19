@@ -5,7 +5,6 @@ const path = require('path');
 const { logger } = require('./util/logger');
 
 const { User } = require('./models/user');
-
 const userRoutes = require('./routes/users');
 
 app.use(express.json()) // for parsing application/json

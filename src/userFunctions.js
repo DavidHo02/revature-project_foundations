@@ -3,7 +3,7 @@ const uuid = require('uuid');
 const { logger } = require('../src/util/logger');
 
 const { User } = require('./models/user');
-const { createUser, validateUser, queryUserByUsername } = require('./userDAO');
+const { createUser, queryUserByUsername } = require('./userDAO');
 
 // working so far
 async function registerUser(username, password) {

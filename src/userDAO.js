@@ -33,10 +33,6 @@ async function createUser(/* OBJECT */ User) {
     }
 }
 
-// check if username and password match what is found in the database
-async function validateUser(username, password) {
-}
-
 async function queryUserByUsername(username) {
     const command = new QueryCommand({
         TableName,
@@ -68,6 +64,5 @@ async function queryUserByUsername(username) {
 
 module.exports = {
     createUser,
-    validateUser,
     queryUserByUsername,
 }
