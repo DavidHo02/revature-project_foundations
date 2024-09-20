@@ -1,9 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 const { logger } = require('../util/logger');
 
 const { registerUser, login } = require('../service/userFunctions');
+
+const secretKey = process.env.JWT_SECRET_KEY;
 
 router.route('/register')
     .get(function (req, res, next) {
@@ -14,7 +18,8 @@ router.route('/register')
 
         // check if username or password are empty
         if(!username || !password) {
-            res.status(400).send('Could not register: username or password is missing!');
+            //res.status(400).send('Could not register: username or password is missing!');
+            res.status(400).json({message: 'Could not register: username or password is missing!'})
             return;
         }
 
@@ -29,7 +34,8 @@ router.route('/register')
                     return;
                 }
                 
-                res.status(201).send('Registration complete!');
+                // res.status(201).send('Registration complete!');
+                res.status(202).json({message: 'Registration complete!'})
                 return;
             });
     });
