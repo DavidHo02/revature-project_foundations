@@ -23,22 +23,52 @@ async function registerUser(username, password) {
     return true;
 }
 
-async function login(username, password) {
+async function login(reqBody) {
+    const { username, password } = reqBody;
+
+    // check if username is empty
+    if (!username) {
+        throw new Error('Could not login: missing username!');
+    }
+
+    // check if password is empty
+    if(!password) {
+        throw new Error('Could not login: missing password!');
+    }
+
     // check that username exists in the database
     // queryUserByUsername returns false if the username is not in the DB
     const userObj = await queryUserByUsername(username);
+
     if(!userObj) {
         // the username does not exist in the database
-        return false;
+        throw new Error('Could not login: invalid credentials');
     }
 
-    // now that we know the username exists in the database, check the password
-    if(password === userObj.password) {
-        return userObj;
-    } else {
-        return false;
+    if(password !== userObj.password) {
+        // the password does not match the one found in the database
+        throw new Error('Could not login: invalid credentials');
     }
+
+    return userObj;
 }
+
+// async function login(username, password) {
+//     // check that username exists in the database
+//     // queryUserByUsername returns false if the username is not in the DB
+//     const userObj = await queryUserByUsername(username);
+//     if(!userObj) {
+//         // the username does not exist in the database
+//         return false;
+//     }
+
+//     // now that we know the username exists in the database, check the password
+//     if(password === userObj.password) {
+//         return userObj;
+//     } else {
+//         return false;
+//     }
+// }
 
 module.exports = {
     registerUser,

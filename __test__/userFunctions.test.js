@@ -49,6 +49,11 @@ describe('User Function Tests', () => {
     test('registerUser should return false when trying to register an already registered username', () => {
         const username = 'david2';
         const password = 'david123';
+        // const reqBody = {
+        //     username: 'david2',
+        //     password: 'david123'
+        // };
+
         queryUserByUsername.mockReturnValueOnce({
             password: 'david123',
             username: 'david2',
@@ -56,6 +61,7 @@ describe('User Function Tests', () => {
             join_date: 1726686455,
             employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89'
         });
+
         return registerUser(username, password)
             .then((data) => {
                 expect(data).toBe(false);
@@ -63,9 +69,12 @@ describe('User Function Tests', () => {
     });
 
     // successful login of Employee account
-    test('login should return a User with a role property of Employee', () => {
-        const username = 'david2';
-        const password = 'david123';
+    test('login should return a User with a role property of Employee', async () => {
+        const reqBody = {
+            username: 'david2',
+            password: 'david123'
+        };
+
         queryUserByUsername.mockReturnValueOnce({
             password: 'david123',
             username: 'david2',
@@ -73,19 +82,20 @@ describe('User Function Tests', () => {
             join_date: 1726686455,
             employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89'
         });
-        return login(username, password)
-            .then((data) => {
-                expect(queryUserByUsername).toHaveBeenCalled();
-                expect(queryUserByUsername).toHaveBeenCalledWith(username);
-                // expect(data.role).toBe('Employee');
-                expect(data).toHaveProperty('role', 'Employee');
-            });
+
+        const result = await login(reqBody);
+        expect(queryUserByUsername).toHaveBeenCalled();
+        expect(queryUserByUsername).toHaveBeenCalledWith(reqBody.username);
+        expect(result).toHaveProperty('role', 'Employee');
     });
 
     // successful login of Manager account
-    test('login should return a User with a role property of Manager', () => {
-        const username = 'admin';
-        const password = 'admin';
+    test('login should return a User with a role property of Manager', async () => {
+        const reqBody = {
+            username: 'admin',
+            password: 'admin'
+        };
+
         queryUserByUsername.mockReturnValueOnce({
             password: 'admin',
             username: 'admin',
@@ -93,32 +103,34 @@ describe('User Function Tests', () => {
             join_date: 1726689060,
             employee_id: '1ea231df-a30e-424f-be5b-ff8c3c7db266'
         });
-        return login(username, password)
-            .then((data) => {
-                expect(queryUserByUsername).toHaveBeenCalled();
-                expect(queryUserByUsername).toHaveBeenCalledWith(username);
-                // expect(data.role).toBe('Manager');
-                expect(data).toHaveProperty('role', 'Manager');
-            });
+
+        const result = await login(reqBody);
+        expect(queryUserByUsername).toHaveBeenCalled();
+        expect(queryUserByUsername).toHaveBeenCalledWith(reqBody.username);
+        expect(result).toHaveProperty('role', 'Manager');
     });
 
     // failed login
-    test('login should return false when trying to login with a wrong username', () => {
-        const username = 'dav';
-        const password = 'david123';
+    test('login should throw an Error when trying to login with a wrong username', async () => {
+        const reqBody = {
+            username: 'dav',
+            password: 'david123'
+        };
+
         queryUserByUsername.mockReturnValueOnce(false);
-        return login(username, password)
-            .then((data) => {
-                expect(queryUserByUsername).toHaveBeenCalled();
-                expect(queryUserByUsername).toHaveBeenCalledWith(username);
-                expect(data).toBe(false);
-            });
+
+        expect(async () => {
+            await login(reqBody);
+        }).rejects.toThrow();
     })
 
     // failed login
-    test('login should return false when trying to login with a wrong password', () => {
-        const username = 'admin';
-        const password = 'feafd';
+    test('login should throw an Error when trying to login with a wrong password', async () => {
+        const reqBody = {
+            username: 'admin',
+            password: 'feafd'
+        };
+
         queryUserByUsername.mockReturnValueOnce({
             password: 'admin',
             username: 'admin',
@@ -126,11 +138,9 @@ describe('User Function Tests', () => {
             join_date: 1726689060,
             employee_id: '1ea231df-a30e-424f-be5b-ff8c3c7db266'
         });
-        return login(username, password)
-            .then((data) => {
-                expect(queryUserByUsername).toHaveBeenCalled();
-                expect(queryUserByUsername).toHaveBeenCalledWith(username);
-                expect(data).toBe(false);
-            });
+
+        expect(async () => {
+            await login(reqBody);
+        }).rejects.toThrow();
     })
 });

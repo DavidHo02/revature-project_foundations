@@ -47,39 +47,29 @@ router.route('/login')
         res.send('GET request to /login handled');
     })
     .post(async function (req, res, next) {
-        const { username, password } = req.body;
+        try {
+            const user = await login(req.body);
 
-        // check if username or password are empty
-        if (!username || !password) {
-            //res.status(400).send('Could not login: username or password is missing!');
-            res.status(400).json({ message: 'Could not login: username or password is missing!' });
+            // generate JWT token
+            const token = jwt.sign(
+                {
+                    employee_id: user.employee_id,
+                    username: user.username,
+                    role: user.role
+                },
+                secretKey,
+                {
+                    expiresIn: '1d'
+                }
+            );
+
+            logger.info(`User ${user.username}:${user.employee_id} logged in`);
+            res.status(202).send(`Login complete! Logged in as ${user.role} with employee_id: ${user.employee_id} and auth token: ${token}`)
+            return;
+        } catch (err) {
+            res.status(400).json(err.message);
             return;
         }
-
-        // login returns a promise because it is an async function
-        const user = await login(username, password);
-        if (!user) {
-            res.status(400).json({ message: 'Could not login: invalid credentials!' });
-            return;
-        }
-
-        // generate JWT token
-        const token = jwt.sign(
-            {
-                employee_id: user.employee_id,
-                username: user.username,
-                role: user.role
-            },
-            secretKey,
-            {
-                expiresIn: '1d'
-            }
-        );
-
-        logger.info(`User ${user.username}:${user.employee_id} logged in`);
-        //res.status(201).send(`Login complete! Logged in as ${user.role}`);
-        res.status(202).send(`Login complete! Logged in as ${user.role} with employee_id: ${user.employee_id} and auth token: ${token}`)
-        return;
     });
 
 async function decodeJWT(token) {
@@ -114,8 +104,8 @@ router.route('/users/:userID/tickets')
         const user = await decodeJWT(token);
         console.log(user);
 
-        if(user.employee_id !== userID) {
-            res.status(403).json({ message: 'You are not the user'})
+        if (user.employee_id !== userID) {
+            res.status(403).json({ message: 'You are not the user' })
             return;
         }
 
