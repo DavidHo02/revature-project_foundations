@@ -58,7 +58,7 @@ describe('Ticket Service Tests', () => {
         const reqBody = {
             employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89',
             description: '',
-            amount: ''
+            amount: null
         }
 
         const result = await submitTicket(reqBody);
@@ -66,10 +66,10 @@ describe('Ticket Service Tests', () => {
         expect(result).toBe(false);
     });
 
-    test('getTicketsByStatus should return', async () => {
-        queryTicketsByStatus.mockReturnValue();
+    // test('getTicketsByStatus should return', async () => {
+    //     queryTicketsByStatus.mockReturnValue();
 
-        const result = getTicketsByStatus();
-    })
+    //     const result = getTicketsByStatus();
+    // })
 
 })

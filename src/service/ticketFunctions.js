@@ -60,11 +60,14 @@ async function authenticateAdminToken(req, res, next) {
 }
 
 async function submitTicket(reqBody) {
+    // if(!validate(reqBody)) {
+    //     return false;
+    // }
     // make sure that the input has employee_id, description, amount
-    if(!validate(reqBody)) {
+    if(!(reqBody.employee_id && reqBody.description && reqBody.amount)) {
         return false;
     }
-    
+
     const newTicket = new Ticket(reqBody.employee_id, reqBody.description, reqBody.amount);
 
     let data = await createTicket(newTicket);

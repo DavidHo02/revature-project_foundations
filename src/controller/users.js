@@ -68,7 +68,15 @@ router.route('/login')
             );
 
             logger.info(`User ${user.username}:${user.employee_id} logged in`);
-            res.status(202).send(`Login complete! Logged in as ${user.role} with employee_id: ${user.employee_id} and auth token: ${token}`)
+            //res.status(202).send(`Login complete! Logged in as ${user.role} with employee_id: ${user.employee_id} and auth token: ${token}`)
+            res.status(202).json(
+                {
+                    message: 'Login complete!',
+                    role: user.role,
+                    employee_id: user.employee_id,
+                    authToken: token
+                }
+            );
             return;
         } catch (err) {
             res.status(400).json(err.message);
