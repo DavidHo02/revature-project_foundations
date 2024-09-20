@@ -13,7 +13,7 @@ async function registerUser(username, password) {
         return false;
     }
 
-    let id = uuid.v4();
+    const id = uuid.v4();
     const newUser = new User(id, username, password);
 
     let data = await createUser(/* OBJECT */newUser);

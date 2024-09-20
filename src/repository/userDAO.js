@@ -49,7 +49,9 @@ async function queryUserByUsername(username) {
     });
 
     try {
+        // console.log('before');
         const data = await documentClient.send(command);
+        // console.log(`inside userDAO.js, data is: ${data}`);
         // check if username exists in the database
         if(data.Items.length === 0) {
             return false; // username does not exist already
