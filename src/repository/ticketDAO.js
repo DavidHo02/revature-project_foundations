@@ -80,7 +80,7 @@ async function getTicketById(ticket_id) {
     }
 }
 
-async function changeTicketStatus(ticket_id, newStatus) {
+async function changeTicketStatus(ticket_id, newStatus, resolver_id) {
     // check to see if a ticket with ticket_id exists in the DB
     const ticket = await getTicketById(ticket_id);
 
@@ -97,20 +97,22 @@ async function changeTicketStatus(ticket_id, newStatus) {
         return false;
     }
 
-    // if the status is pending, update the ticket's status to newStatus in the DB
-    // TODO: update the ticket's resolver
+    // if the status is pending, update the ticket's status to newStatus in the DB,
+    // and update the ticket's resolver
     const command = new UpdateCommand({
         TableName,
         Key: {
             'ticket_id': ticket_id,
             'creation_date': ticket.creation_date
         },
-        UpdateExpression: 'set #status = :s',
+        UpdateExpression: 'set #status = :s, #resolver_id = :r',
         ExpressionAttributeNames: {
-            '#status': 'status'
+            '#status': 'status',
+            '#resolver_id': 'resolver_id'
         },
         ExpressionAttributeValues: {
-            ':s': newStatus
+            ':s': newStatus,
+            ':r': resolver_id
         },
         ReturnValues: 'ALL_NEW'
     });

@@ -1,9 +1,13 @@
 const uuid = require('uuid');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 const { logger } = require('../util/logger');
 
 const { Ticket } = require('../models/ticket');
 const { createTicket, queryTicketsByStatus, changeTicketStatus } = require('../repository/ticketDAO');
+
+const secretKey = process.env.JWT_SECRET_KEY;
 
 /**
  * PURPOSE:
@@ -11,6 +15,48 @@ const { createTicket, queryTicketsByStatus, changeTicketStatus } = require('../r
  */
 function validate(reqBody) {
     return (reqBody.employee_id && reqBody.description && reqBody.amount)
+}
+
+/**
+ * PURPOSE:
+ * Determine the user of this request
+ */
+async function decodeJWT(token) {
+    try {
+        const user = await jwt.verify(token, secretKey);
+        return user;
+        // console.log(user);
+        // {
+        //     id: '95875b90-2c04-4d10-8709-7a7470740095',
+        //     username: 'test-user',
+        //     role: 'Employee',
+        //     iat: 1726845007,
+        //     exp: 1726931407
+        //   }
+    } catch(err) {
+        logger.error(err);
+    }
+}
+
+async function authenticateAdminToken(req, res, next) {
+    // Bearer token
+
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if(!token) {
+        res.status(401).json({message: 'Unauthorized Access'});
+        return;
+    }
+
+    const user = await decodeJWT(token);
+    if(user.role !== 'Manager') {
+        res.status(403).json({message: 'Forbidden Access'});
+        return;
+    }
+
+    req.user = user;
+    next();
 }
 
 async function submitTicket(reqBody) {
@@ -39,14 +85,13 @@ async function getTicketsByStatus(reqQuery) {
 async function updateTicketStatus(req) {
     const { ticket_id } = req.params;
     const { status } = req.body;
+    const resolver_id = req.user.employee_id;
 
-    // console.log(`ticket_id is: ${ticket_id}, status is: ${status}`);
-
-    if(!(ticket_id && status)) {
+    if(!(ticket_id && status && resolver_id)) {
         return false;
     }
 
-    let data = await changeTicketStatus(ticket_id, status);
+    let data = await changeTicketStatus(ticket_id, status, resolver_id);
 
     return data;
     // console.log(data)
@@ -63,6 +108,7 @@ async function updateTicketStatus(req) {
 }
 
 module.exports = {
+    authenticateAdminToken,
     submitTicket,
     getTicketsByStatus,
     updateTicketStatus

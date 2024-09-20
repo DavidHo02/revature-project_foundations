@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { submitTicket, getTicketsByStatus, updateTicketStatus } = require('../service/ticketFunctions');
+const { authenticateAdminToken, submitTicket, getTicketsByStatus, updateTicketStatus } = require('../service/ticketFunctions');
 
 router.route('/submit')
     .get()
@@ -23,7 +23,7 @@ router.route('/tickets/:ticket_id')
         //console.log(req.params);
         res.status(200).send('GET request handled');
     })
-    .put(async function (req, res, next) {
+    .put(authenticateAdminToken, async function (req, res, next) {
         const updatedTicket = await updateTicketStatus(req);
 
         if(!updatedTicket) {

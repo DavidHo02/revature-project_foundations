@@ -61,8 +61,21 @@ router.route('/login')
             return;
         }
 
+        // generate JWT token
+        const token = jwt.sign(
+            {
+                employee_id: user.employee_id,
+                username: user.username,
+                role: user.role
+            },
+            secretKey,
+            {
+                expiresIn: '1d'
+            }
+        );
+
         //res.status(201).send(`Login complete! Logged in as ${user.role}`);
-        res.status(201).send(`Login complete! Logged in as ${user.role} with employee_id: ${user.employee_id}`)
+        res.status(201).send(`Login complete! Logged in as ${user.role} with employee_id: ${user.employee_id} and auth token: ${token}`)
         return;
     });
 
