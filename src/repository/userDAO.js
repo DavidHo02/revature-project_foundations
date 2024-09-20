@@ -22,17 +22,6 @@ async function createUser(/* OBJECT */ User) {
 
     try {
         const data = await documentClient.send(command);
-        // SAMPLE OUTPUT
-        // {
-        //     '$metadata': {
-        //       httpStatusCode: 200,
-        //       requestId: 'OE9BT8TB8VF4HIIQB102CQVSI7VV4KQNSO5AEMVJF66Q9ASUAAJG',
-        //       extendedRequestId: undefined,
-        //       cfId: undefined,
-        //       attempts: 1,
-        //       totalRetryDelay: 0
-        //     }
-        //   }
         return data;
     } catch(err) {
         logger.error(err);
@@ -50,20 +39,13 @@ async function queryUserByUsername(username) {
 
     try {
         const data = await documentClient.send(command);
-        
+
         // check if username exists in the database
         if(data.Items.length === 0) {
             return false; // username does not exist already
         }
+
         return unmarshall(data.Items[0]); // username exists already
-        // SAMPLE RETURN
-        // {
-        //     password: 'david123',
-        //     username: 'david2',
-        //     role: 'Employee',
-        //     join_date: 1726686455,
-        //     employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89'
-        //   }
     } catch(err) {
         logger.error(err);
     }

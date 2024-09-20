@@ -18,7 +18,7 @@ router.route('/register')
         try {
             registerUser(req.body);
 
-            logger.info(`Registration of new user`);
+            // logger.info(`Registration of new user`);
             res.status(201).json({ message: 'Registration complete!' })
             return;
         } catch(err) {
