@@ -4,6 +4,7 @@ const { logger } = require('../util/logger');
 
 const { User } = require('../models/user');
 const { createUser, queryUserByUsername } = require('../repository/userDAO');
+const { queryTicketsByUserId } = require('../repository/ticketDAO');
 
 async function registerUser(username, password) {
     // check if username already exists

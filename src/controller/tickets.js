@@ -24,15 +24,23 @@ router.route('/tickets/:ticket_id')
         res.status(200).send('GET request handled');
     })
     .put(authenticateAdminToken, async function (req, res, next) {
-        const updatedTicket = await updateTicketStatus(req);
+        try {
+            const updatedTicket = await updateTicketStatus(req);
 
-        if(!updatedTicket) {
-            res.status(400).json({message: 'Could not update ticket\'s status'});
+            res.status(202).json(updatedTicket);
+            return;
+        } catch(err) {
+            res.status(400).json(err.message);
             return;
         }
 
-        res.status(202).json(updatedTicket);
-        return;
+        // if(!updatedTicket) {
+        //     res.status(400).json({message: 'Could not update ticket\'s status'});
+        //     return;
+        // }
+
+        // res.status(202).json(updatedTicket);
+        // return;
     })
 
 router.route('/tickets')

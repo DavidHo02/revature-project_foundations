@@ -5,7 +5,7 @@ require('dotenv').config();
 const { logger } = require('../util/logger');
 
 const { Ticket } = require('../models/ticket');
-const { createTicket, queryTicketsByStatus, changeTicketStatus } = require('../repository/ticketDAO');
+const { createTicket, queryTicketsByStatus, queryTicketsByUserId, getTicketById, changeTicketStatus } = require('../repository/ticketDAO');
 
 const secretKey = process.env.JWT_SECRET_KEY;
 
@@ -82,18 +82,29 @@ async function getTicketsByStatus(reqQuery) {
     return data;
 }
 
+async function getTicketsByUserId(userId) {
+    const result = await queryTicketsByUserId(userId);
+    return result;
+}
+
 async function updateTicketStatus(req) {
     const { ticket_id } = req.params;
     const { status } = req.body;
     const resolver_id = req.user.employee_id;
 
     if(!(ticket_id && status && resolver_id)) {
-        return false;
+        throw new Error('Could not change ticket status: missing ticket_id, status, or resolver_id');
+    }
+
+    const ticketToBeUpdated = await getTicketById(ticket_id);
+
+    if(ticketToBeUpdated.status !== 'pending') {
+        throw new Error(`Could not change ticket status: ticket is already ${ticketToBeUpdated.status}`);
     }
 
     let data = await changeTicketStatus(ticket_id, status, resolver_id);
 
-    return data;
+    return data ? data : null;
     // console.log(data)
     // SAMPLE OUTPUT
     // {
@@ -111,5 +122,6 @@ module.exports = {
     authenticateAdminToken,
     submitTicket,
     getTicketsByStatus,
+    getTicketsByUserId,
     updateTicketStatus
 }

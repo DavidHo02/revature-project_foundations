@@ -59,6 +59,32 @@ async function queryTicketsByStatus(status) {
     }
 }
 
+async function queryTicketsByUserId(userId) {
+    const command = new QueryCommand({
+        TableName,
+        IndexName: 'employee_id-creation_date-index',
+        KeyConditionExpression: '#employee_id = :e_id',
+        ExpressionAttributeNames: { '#employee_id': 'employee_id' },
+        ExpressionAttributeValues: { ':e_id': {S: userId} }
+    });
+
+    try {
+        const data = await documentClient.send(command);
+        // console.log(`data is: ${data}`);
+        /**
+         * can't unmarshall data.Items because it's an array, so unmarshall each record inside data.Items
+         * then put each unmarshalled record inside the items array
+         */
+        const items = data.Items.map((record) => {
+            return unmarshall(record);
+        })
+
+        return items;
+    } catch(err) {
+        logger.error(err);
+    }
+}
+
 async function getTicketById(ticket_id) {
     const command = new QueryCommand({
         TableName,
@@ -92,10 +118,10 @@ async function changeTicketStatus(ticket_id, newStatus, resolver_id) {
 
     // if it does exist, check if the status is pending
     // if the status is not pending, EXIT
-    if(ticket.status !== 'pending') {
-        // console.log('ticket\'s status is NOT pending');
-        return false;
-    }
+    // if(ticket.status !== 'pending') {
+    //     // console.log('ticket\'s status is NOT pending');
+    //     return false;
+    // }
 
     // if the status is pending, update the ticket's status to newStatus in the DB,
     // and update the ticket's resolver
@@ -131,5 +157,7 @@ async function changeTicketStatus(ticket_id, newStatus, resolver_id) {
 module.exports = {
     createTicket,
     queryTicketsByStatus,
+    queryTicketsByUserId,
+    getTicketById,
     changeTicketStatus
 }
