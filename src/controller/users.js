@@ -37,7 +37,7 @@ router.route('/register')
 
                 logger.info(`Registration of new user`);
                 // res.status(201).send('Registration complete!');
-                res.status(202).json({ message: 'Registration complete!' })
+                res.status(201).json({ message: 'Registration complete!' })
                 return;
             });
     });
@@ -78,7 +78,7 @@ router.route('/login')
 
         logger.info(`User ${user.username}:${user.employee_id} logged in`);
         //res.status(201).send(`Login complete! Logged in as ${user.role}`);
-        res.status(201).send(`Login complete! Logged in as ${user.role} with employee_id: ${user.employee_id} and auth token: ${token}`)
+        res.status(202).send(`Login complete! Logged in as ${user.role} with employee_id: ${user.employee_id} and auth token: ${token}`)
         return;
     });
 
