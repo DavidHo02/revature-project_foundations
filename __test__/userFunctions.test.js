@@ -34,25 +34,26 @@ describe('User Creation Tests', () => {
 
 describe('User Function Tests', () => {
     // successful registration of a User
-    test('registerUser should return true when trying to register a new User', () => {
-        const username = 'david2';
-        const password = 'david123';
+    test('registerUser should return true when trying to register a new User', async () => {
+        const reqBody = {
+            username: 'david2',
+            password: 'david123'
+        };
+
         queryUserByUsername.mockReturnValueOnce(false);
-        return registerUser(username, password)
-            .then((data) => {
-                expect(createUser).toHaveBeenCalled();
-                expect(data).toBe(true);
-            });
+
+        const result = await registerUser(reqBody);
+        expect(createUser).toHaveBeenCalled();
+        expect(queryUserByUsername).toHaveBeenCalled();
+        expect(result).toBe(true);
     });
 
-    // failed registration of a User
-    test('registerUser should return false when trying to register an already registered username', () => {
-        const username = 'david2';
-        const password = 'david123';
-        // const reqBody = {
-        //     username: 'david2',
-        //     password: 'david123'
-        // };
+    // // failed registration of a User
+    test('registerUser should throw an Error when trying to register an already registered username', async () => {
+        const reqBody = {
+            username: 'david2',
+            password: 'david123'
+        };
 
         queryUserByUsername.mockReturnValueOnce({
             password: 'david123',
@@ -62,10 +63,10 @@ describe('User Function Tests', () => {
             employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89'
         });
 
-        return registerUser(username, password)
-            .then((data) => {
-                expect(data).toBe(false);
-            });
+        expect(async () => {
+            await registerUser(reqBody);
+        }).rejects.toThrow();
+        expect(queryUserByUsername).toHaveBeenCalled();
     });
 
     // successful login of Employee account

@@ -15,31 +15,35 @@ router.route('/register')
         res.send('GET request to /register handled');
     })
     .post(function (req, res, next) {
-        const { username, password } = req.body;
+        try {
+            registerUser(req.body);
 
-        // check if username or password are empty
-        if (!username || !password) {
-            //res.status(400).send('Could not register: username or password is missing!');
-            res.status(400).json({ message: 'Could not register: username or password is missing!' })
+            logger.info(`Registration of new user`);
+            res.status(201).json({ message: 'Registration complete!' })
+            return;
+        } catch(err) {
+            res.status(400).json(err.message);
             return;
         }
 
-        // registerUser returns a promise because it is an async function
-        registerUser(username, password)
-            .then((data) => {
-                // console.log(data);
-                // check if data is false
-                if (!data) {
-                    //res.status(400).send('Could not register: username is already taken!');
-                    res.status(400).json({ message: 'Could not register: username is already taken!' });
-                    return;
-                }
 
-                logger.info(`Registration of new user`);
-                // res.status(201).send('Registration complete!');
-                res.status(201).json({ message: 'Registration complete!' })
-                return;
-            });
+
+        // registerUser returns a promise because it is an async function
+        // registerUser(username, password)
+        //     .then((data) => {
+        //         // console.log(data);
+        //         // check if data is false
+        //         if (!data) {
+        //             //res.status(400).send('Could not register: username is already taken!');
+        //             res.status(400).json({ message: 'Could not register: username is already taken!' });
+        //             return;
+        //         }
+
+        //         logger.info(`Registration of new user`);
+        //         // res.status(201).send('Registration complete!');
+        //         res.status(201).json({ message: 'Registration complete!' })
+        //         return;
+        //     });
     });
 
 router.route('/login')
