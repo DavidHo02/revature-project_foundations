@@ -3,20 +3,20 @@ const router = express.Router();
 
 const { authenticateAdminToken, submitTicket, getTicketsByStatus, updateTicketStatus } = require('../service/ticketFunctions');
 
-router.route('/submit')
-    .get()
-    .post(async function (req, res, next) {
-        let result = await submitTicket(req.body);
+// router.route('/submit')
+//     .get()
+//     .post(async function (req, res, next) {
+//         let result = await submitTicket(req.body);
 
-        if(!result) {
-            res.status(400).json({message: 'Could not submit ticket: missing employee_id, description, or amount!'});
-            return;
-        }
+//         if(!result) {
+//             res.status(400).json({message: 'Could not submit ticket: missing employee_id, description, or amount!'});
+//             return;
+//         }
 
-        // TODO: send back ticket_id
-        res.status(201).send('Ticket submitted!');
-        return;
-    })
+//         // TODO: send back ticket_id
+//         res.status(201).send('Ticket submitted!');
+//         return;
+//     })
 
 router.route('/tickets/:ticket_id')
     .get(function (req, res, next) {
@@ -50,6 +50,18 @@ router.route('/tickets')
         let result = await getTicketsByStatus(req.query);
 
         res.status(200).json(result);
+        return;
+    })
+    .post(async function (req, res, next) {
+        let result = await submitTicket(req.body);
+
+        if(!result) {
+            res.status(400).json({message: 'Could not submit ticket: missing employee_id, description, or amount!'});
+            return;
+        }
+
+        // TODO: send back ticket_id
+        res.status(201).send('Ticket submitted!');
         return;
     })
 
