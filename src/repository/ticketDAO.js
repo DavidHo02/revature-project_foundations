@@ -71,7 +71,12 @@ async function queryTicketsByUserId(userId) {
 
     try {
         const data = await documentClient.send(command);
-        // console.log(`data is: ${data}`);
+        
+        if(data.Items.length === 0) {
+            // return false;
+            return [];
+        }
+
         /**
          * can't unmarshall data.Items because it's an array, so unmarshall each record inside data.Items
          * then put each unmarshalled record inside the items array
@@ -146,14 +151,11 @@ async function changeTicketStatus(ticket_id, newStatus, resolver_id) {
 
     try {
         const data = await documentClient.send(command);
-        //console.log(`update data: ${data}`)
         return data.Attributes;
     } catch(err) {
         logger.error(err);
     }
 }
-
-// createTicket(new Ticket('52caac7a-e48f-4587-9eac-c87422f4ba89', 'test', 12.34));
 
 module.exports = {
     createTicket,

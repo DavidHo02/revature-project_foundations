@@ -1,6 +1,6 @@
 const { Ticket } = require('../src/models/ticket');
-const { createTicket, queryTicketsByStatus } = require('../src/repository/ticketDAO');
-const { submitTicket, getTicketsByStatus } = require('../src/service/ticketFunctions');
+const { createTicket, queryTicketsByStatus, queryTicketsByUserId, getTicketById } = require('../src/repository/ticketDAO');
+const { submitTicket, getTicketsByStatus, getTicketsByUserId, updateTicketStatus } = require('../src/service/ticketFunctions');
 
 jest.mock('../src/repository/ticketDAO', () => {
     const originalModule = jest.requireActual('../src/repository/ticketDAO');
@@ -9,6 +9,8 @@ jest.mock('../src/repository/ticketDAO', () => {
         ...originalModule,
         createTicket: jest.fn(),
         queryTicketsByStatus: jest.fn(),
+        queryTicketsByUserId: jest.fn(),
+        getTicketById: jest.fn(),
     }
 });
 
@@ -41,35 +43,178 @@ describe('Ticket Creation Tests', () => {
 
 describe('Ticket Service Tests', () => {
 
-    test('submitTicket should return true when trying to submit a ticket', async () => {
+    test('submitTicket should return an object with a message and ticket_id property', async () => {
         const reqBody = {
             employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89',
             description: 'Purchased new office chair',
             amount: 89.99
         }
 
-        const result = await submitTicket(reqBody);
+        const result = await submitTicket(reqBody, '52caac7a-e48f-4587-9eac-c87422f4ba89');
 
         expect(createTicket).toHaveBeenCalled();
-        expect(result).toBe(true);
+        expect(result).toHaveProperty('message');
+        expect(result.message).toBe('Ticket submission successful');
+        expect(result).toHaveProperty('ticket_id');
     });
 
-    test('submitTicket should return false when trying to submit a ticket with missing required parameter(s)', async () => {
+    test('submitTicket should throw an error when trying to submit a ticket with missing required parameter(s)', async () => {
         const reqBody = {
             employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89',
-            description: '',
+            description: 'test',
             amount: null
         }
 
-        const result = await submitTicket(reqBody);
-
-        expect(result).toBe(false);
+        expect(async () => {
+            await submitTicket(reqBody, '52caac7a-e48f-4587-9eac-c87422f4ba89');
+        }).rejects.toThrow(new Error('Could not submit ticket: missing reimbursement amount!'));
     });
 
-    // test('getTicketsByStatus should return', async () => {
-    //     queryTicketsByStatus.mockReturnValue();
+    test('getTicketsByStatus should return an empty list ', async () => {
+        const reqQuery = {
+            status: 'pending'
+        }
+        queryTicketsByStatus.mockReturnValueOnce([]);
 
-    //     const result = getTicketsByStatus();
-    // })
+        const result = await getTicketsByStatus(reqQuery);
+
+        expect(result).toHaveLength(0);
+    });
+
+    test('getTicketsByStatus should return a nonempty list', async () => {
+        const reqQuery = {
+            status: 'pending'
+        }
+        queryTicketsByStatus.mockReturnValueOnce([
+            {
+                ticket_id: "c1faed78-5ab9-495e-9e2d-2d5c7589751d",
+                employee_id: "56a5626c-3b8e-487c-83dc-3f5ade1d3b49",
+                status: "pending",
+                resolver_id: "-1",
+                amount: "103.45",
+                description: "Bought gas for company car",
+                creation_date: 1727111362
+            },
+            {
+                ticket_id: "0e5b18fe-6fe9-402b-afb5-bfc4be652582",
+                employee_id: "20d656b5-3c41-4bff-a1fb-f759f2e29656",
+                status: "pending",
+                resolver_id: "-1",
+                amount: "1,241.21",
+                description: "Plane ticket for company conference",
+                creation_date: 1727109715
+            }
+        ]);
+
+        const result = await getTicketsByStatus(reqQuery);
+
+        expect(result).toHaveLength(2);
+    });
+
+    test('getTicketsByUserId should return an empty list ', async () => {
+        queryTicketsByUserId.mockReturnValueOnce([]);
+
+        const result = await getTicketsByUserId('20d656b5-3c41-4bff-a1fb-f759f2e29656');
+
+        expect(result).toHaveLength(0);
+    });
+
+    test('getTicketsByUserId should return a nonempty list', async () => {
+        queryTicketsByUserId.mockReturnValueOnce([
+            {
+                ticket_id: "0e5b18fe-6fe9-402b-afb5-bfc4be652582",
+                employee_id: "20d656b5-3c41-4bff-a1fb-f759f2e29656",
+                status: "approved",
+                resolver_id: "1ea231df-a30e-424f-be5b-ff8c3c7db266",
+                amount: "103.45",
+                description: "Bought gas for company car",
+                creation_date: 1727109715
+            }
+        ]);
+
+        const result = await getTicketsByUserId('20d656b5-3c41-4bff-a1fb-f759f2e29656');
+
+        expect(result).toHaveLength(1);
+    });
+
+    test('updateTicketStatus should throw an error when trying to update a ticket with a missing update field', async () => {
+        const mockReq = {
+            body: {
+                status: null
+            },
+            params: {
+                ticket_id: '0e5b18fe-6fe9-402b-afb5-bfc4be652582'
+            },
+            user: {
+                employee_id: '1ea231df-a30e-424f-be5b-ff8c3c7db266',
+                username: 'admin',
+                role: 'Manager',
+                iat: 1727117261,
+                exp: 1727203661
+            }
+        };
+
+        expect(async () => {
+            await updateTicketStatus(mockReq);
+        }).rejects.toThrow(new Error('Could not change ticket status: missing ticket_id, status, or resolver_id'));
+    });
+
+    test('updateTicketStatus should throw an error when trying to update a ticket that does not exist', async () => {
+        const mockReq = {
+            body: {
+                status: 'approved'
+            },
+            params: {
+                ticket_id: 'doesNotExist'
+            },
+            user: {
+                employee_id: '1ea231df-a30e-424f-be5b-ff8c3c7db266',
+                username: 'admin',
+                role: 'Manager',
+                iat: 1727117261,
+                exp: 1727203661
+            }
+        };
+
+        getTicketById.mockReturnValueOnce(false);
+
+        expect(async () => {
+            await updateTicketStatus(mockReq);
+        }).rejects.toThrow(new Error('Could not change ticket status: ticket with id of doesNotExist does not exist!'))
+    });
+
+    test('updateTicketStatus should throw an error when trying to update a ticket with status not pending', async () => {
+        const mockReq = {
+            body: {
+                status: 'approved'
+            },
+            params: {
+                ticket_id: '0e5b18fe-6fe9-402b-afb5-bfc4be652582'
+            },
+            user: {
+                employee_id: '1ea231df-a30e-424f-be5b-ff8c3c7db266',
+                username: 'admin',
+                role: 'Manager',
+                iat: 1727117261,
+                exp: 1727203661
+            }
+        };
+
+        getTicketById.mockReturnValueOnce(
+            {
+                ticket_id: '0e5b18fe-6fe9-402b-afb5-bfc4be652582',
+                employee_id: '20d656b5-3c41-4bff-a1fb-f759f2e29656',
+                resolver_id: '1ea231df-a30e-424f-be5b-ff8c3c7db266',
+                status: 'approved',
+                amount: '103.45',
+                description: 'Bought gas for company car',
+                creation_date: 1727109715
+              }
+        );
+
+        expect(async () => {
+            await updateTicketStatus(mockReq);
+        }).rejects.toThrow(new Error('Could not change ticket status: ticket is already approved'))
+    });
 
 })

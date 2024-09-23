@@ -11,28 +11,12 @@ const secretKey = process.env.JWT_SECRET_KEY;
 
 /**
  * PURPOSE:
- * 
- */
-// function validate(reqBody) {
-//     return (reqBody.employee_id && reqBody.description && reqBody.amount)
-// }
-
-/**
- * PURPOSE:
  * Determine the user of this request
  */
 async function decodeJWT(token) {
     try {
         const user = await jwt.verify(token, secretKey);
         return user;
-        // console.log(user);
-        // {
-        //     id: '95875b90-2c04-4d10-8709-7a7470740095',
-        //     username: 'test-user',
-        //     role: 'Employee',
-        //     iat: 1726845007,
-        //     exp: 1726931407
-        //   }
     } catch(err) {
         logger.error(err);
     }
@@ -75,7 +59,6 @@ async function submitTicket(reqBody, eIdFromAuth) {
     
     // the user submitting this ticket does not match the sender of the submit request
     if(reqBody.employee_id !== eIdFromAuth) {
-        console.log(`reqBody: ${reqBody.employee_id}, authID: ${eIdFromAuth}`);
         throw new Error('Could not submit ticket: employee ID from auth token does not match the request body\'s employee ID');
     }
 

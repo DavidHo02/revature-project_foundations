@@ -75,9 +75,9 @@ router.route('/users/:userID/tickets')
             res.status(401).json({ message: 'Missing auth token' });
             return;
         }
+        const user = await decodeJWT(token);
 
         const userID = req.params.userID;
-        const user = await decodeJWT(token);
 
         if (user.employee_id !== userID) {
             res.status(403).json({ message: 'You are not the user' })
