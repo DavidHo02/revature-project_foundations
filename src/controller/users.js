@@ -6,7 +6,7 @@ require('dotenv').config();
 const { logger } = require('../util/logger');
 
 const { registerUser, login } = require('../service/userFunctions');
-const { getTicketsByUserId } = require('../service/ticketFunctions');
+const { decodeJWT, getTicketsByUserId } = require('../service/ticketFunctions');
 
 const secretKey = process.env.JWT_SECRET_KEY;
 
@@ -84,22 +84,22 @@ router.route('/login')
         }
     });
 
-async function decodeJWT(token) {
-    try {
-        const user = await jwt.verify(token, secretKey);
-        return user;
-        // console.log(user);
-        // {
-        //     id: '95875b90-2c04-4d10-8709-7a7470740095',
-        //     username: 'test-user',
-        //     role: 'Employee',
-        //     iat: 1726845007,
-        //     exp: 1726931407
-        //   }
-    } catch (err) {
-        logger.error(err);
-    }
-}
+// async function decodeJWT(token) {
+//     try {
+//         const user = await jwt.verify(token, secretKey);
+//         return user;
+//         // console.log(user);
+//         // {
+//         //     id: '95875b90-2c04-4d10-8709-7a7470740095',
+//         //     username: 'test-user',
+//         //     role: 'Employee',
+//         //     iat: 1726845007,
+//         //     exp: 1726931407
+//         //   }
+//     } catch (err) {
+//         logger.error(err);
+//     }
+// }
 
 router.route('/users/:userID/tickets')
     .get(async function (req, res, next) {
@@ -114,7 +114,6 @@ router.route('/users/:userID/tickets')
 
         const userID = req.params.userID;
         const user = await decodeJWT(token);
-        console.log(user);
 
         if (user.employee_id !== userID) {
             res.status(403).json({ message: 'You are not the user' })

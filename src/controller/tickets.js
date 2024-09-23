@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { authenticateAdminToken, submitTicket, getTicketsByStatus, updateTicketStatus } = require('../service/ticketFunctions');
+const { decodeJWT, authenticateAdminToken, submitTicket, getTicketsByStatus, updateTicketStatus } = require('../service/ticketFunctions');
 
 // router.route('/submit')
 //     .get()
@@ -30,7 +30,7 @@ router.route('/tickets/:ticket_id')
 
             res.status(202).json(updatedTicket);
             return;
-        } catch(err) {
+        } catch (err) {
             res.status(400).json(err.message);
             return;
         }
@@ -43,18 +43,28 @@ router.route('/tickets')
 
             res.status(200).json(result);
             return;
-        } catch(err) {
+        } catch (err) {
             res.status(400).json(err.message);
             return;
         }
     })
     // TODO: change ticket submission to require auth header to confirm it is the user submitting
     .post(async function (req, res, next) {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(" ")[1];
+
+        if (!token) {
+            res.status(401).json({ message: 'Missing auth token!' });
+            return;
+        }
+
+        const user = await decodeJWT(token);
+
         try {
-            const result = await submitTicket(req.body);
-            
+            const result = await submitTicket(req.body, user.employee_id);
+
             res.status(201).json(result);
-        } catch(err) {
+        } catch (err) {
             res.status(400).json(err.message);
             return;
         }

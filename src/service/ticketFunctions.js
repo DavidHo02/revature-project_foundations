@@ -59,12 +59,8 @@ async function authenticateAdminToken(req, res, next) {
     next();
 }
 
-async function submitTicket(reqBody) {
+async function submitTicket(reqBody, eIdFromAuth) {
     // make sure that the input has employee_id, description, amount
-    // if(!(reqBody.employee_id && reqBody.description && reqBody.amount)) {
-    //     return false;
-    // }
-
     if(!reqBody.employee_id) {
         throw new Error('Could not submit ticket: missing ticket\'s employee id!');
     }
@@ -75,6 +71,12 @@ async function submitTicket(reqBody) {
 
     if(!reqBody.amount) {
         throw new Error('Could not submit ticket: missing reimbursement amount!');
+    }
+    
+    // the user submitting this ticket does not match the sender of the submit request
+    if(reqBody.employee_id !== eIdFromAuth) {
+        console.log(`reqBody: ${reqBody.employee_id}, authID: ${eIdFromAuth}`);
+        throw new Error('Could not submit ticket: employee ID from auth token does not match the request body\'s employee ID');
     }
 
     const newTicket = new Ticket(reqBody.employee_id, reqBody.description, reqBody.amount);
@@ -139,6 +141,7 @@ async function updateTicketStatus(req) {
 }
 
 module.exports = {
+    decodeJWT,
     authenticateAdminToken,
     submitTicket,
     getTicketsByStatus,
