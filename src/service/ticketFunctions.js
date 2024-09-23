@@ -13,9 +13,9 @@ const secretKey = process.env.JWT_SECRET_KEY;
  * PURPOSE:
  * 
  */
-function validate(reqBody) {
-    return (reqBody.employee_id && reqBody.description && reqBody.amount)
-}
+// function validate(reqBody) {
+//     return (reqBody.employee_id && reqBody.description && reqBody.amount)
+// }
 
 /**
  * PURPOSE:
@@ -60,22 +60,39 @@ async function authenticateAdminToken(req, res, next) {
 }
 
 async function submitTicket(reqBody) {
-    // if(!validate(reqBody)) {
+    // make sure that the input has employee_id, description, amount
+    // if(!(reqBody.employee_id && reqBody.description && reqBody.amount)) {
     //     return false;
     // }
-    // make sure that the input has employee_id, description, amount
-    if(!(reqBody.employee_id && reqBody.description && reqBody.amount)) {
-        return false;
+
+    if(!reqBody.employee_id) {
+        throw new Error('Could not submit ticket: missing ticket\'s employee id!');
+    }
+
+    if(!reqBody.description) {
+        throw new Error('Could not submit ticket: missing ticket\'s description!');
+    }
+
+    if(!reqBody.amount) {
+        throw new Error('Could not submit ticket: missing reimbursement amount!');
     }
 
     const newTicket = new Ticket(reqBody.employee_id, reqBody.description, reqBody.amount);
 
     let data = await createTicket(newTicket);
-    return true;
+    //return true;
+    return {
+        message: "Ticket submission successful",
+        ticket_id: newTicket.ticket_id
+    }
 }
 
 async function getTicketsByStatus(reqQuery) {
     const { status } = reqQuery;
+
+    if(!status) {
+        throw new Error('Could not get tickets: status query is missing');
+    }
 
     let data = await queryTicketsByStatus(status);
     if(!data) {

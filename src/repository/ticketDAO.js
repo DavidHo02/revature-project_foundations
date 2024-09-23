@@ -42,7 +42,8 @@ async function queryTicketsByStatus(status) {
         const data = await documentClient.send(command);
 
         if(data.Items.length === 0) {
-            return false;
+            // return false;
+            return [];
         }
 
         /**

@@ -34,35 +34,30 @@ router.route('/tickets/:ticket_id')
             res.status(400).json(err.message);
             return;
         }
-
-        // if(!updatedTicket) {
-        //     res.status(400).json({message: 'Could not update ticket\'s status'});
-        //     return;
-        // }
-
-        // res.status(202).json(updatedTicket);
-        // return;
     })
 
 router.route('/tickets')
-    .get(async function (req, res, next) {
-        // console.log(req.query);
-        let result = await getTicketsByStatus(req.query);
+    .get(authenticateAdminToken, async function (req, res, next) {
+        try {
+            const result = await getTicketsByStatus(req.query);
 
-        res.status(200).json(result);
-        return;
-    })
-    .post(async function (req, res, next) {
-        let result = await submitTicket(req.body);
-
-        if(!result) {
-            res.status(400).json({message: 'Could not submit ticket: missing employee_id, description, or amount!'});
+            res.status(200).json(result);
+            return;
+        } catch(err) {
+            res.status(400).json(err.message);
             return;
         }
-
-        // TODO: send back ticket_id
-        res.status(201).send('Ticket submitted!');
-        return;
+    })
+    // TODO: change ticket submission to require auth header to confirm it is the user submitting
+    .post(async function (req, res, next) {
+        try {
+            const result = await submitTicket(req.body);
+            
+            res.status(201).json(result);
+        } catch(err) {
+            res.status(400).json(err.message);
+            return;
+        }
     })
 
 module.exports = router;
