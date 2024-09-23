@@ -25,25 +25,6 @@ router.route('/register')
             res.status(400).json(err.message);
             return;
         }
-
-
-
-        // registerUser returns a promise because it is an async function
-        // registerUser(username, password)
-        //     .then((data) => {
-        //         // console.log(data);
-        //         // check if data is false
-        //         if (!data) {
-        //             //res.status(400).send('Could not register: username is already taken!');
-        //             res.status(400).json({ message: 'Could not register: username is already taken!' });
-        //             return;
-        //         }
-
-        //         logger.info(`Registration of new user`);
-        //         // res.status(201).send('Registration complete!');
-        //         res.status(201).json({ message: 'Registration complete!' })
-        //         return;
-        //     });
     });
 
 router.route('/login')
@@ -84,23 +65,6 @@ router.route('/login')
         }
     });
 
-// async function decodeJWT(token) {
-//     try {
-//         const user = await jwt.verify(token, secretKey);
-//         return user;
-//         // console.log(user);
-//         // {
-//         //     id: '95875b90-2c04-4d10-8709-7a7470740095',
-//         //     username: 'test-user',
-//         //     role: 'Employee',
-//         //     iat: 1726845007,
-//         //     exp: 1726931407
-//         //   }
-//     } catch (err) {
-//         logger.error(err);
-//     }
-// }
-
 router.route('/users/:userID/tickets')
     .get(async function (req, res, next) {
         // make sure the client sending this request has an id equal to :userID
@@ -108,7 +72,7 @@ router.route('/users/:userID/tickets')
         const token = authHeader && authHeader.split(" ")[1];
 
         if (!token) {
-            res.status(401).json({ message: 'Unauthorized Access' });
+            res.status(401).json({ message: 'Missing auth token' });
             return;
         }
 
