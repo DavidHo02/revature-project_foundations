@@ -14,15 +14,15 @@ router.route('/register')
     .get(function (req, res, next) {
         res.send('GET request to /register handled');
     })
-    .post(function (req, res, next) {
+    .post(async function (req, res, next) {
         try {
-            registerUser(req.body);
+            await registerUser(req.body);
 
             // logger.info(`Registration of new user`);
             res.status(201).json({ message: 'Registration complete!' })
             return;
         } catch(err) {
-            res.status(400).json(err.message);
+            res.status(400).json({ message: err.message });
             return;
         }
     });
@@ -60,7 +60,7 @@ router.route('/login')
             );
             return;
         } catch (err) {
-            res.status(400).json(err.message);
+            res.status(400).json({ message: err.message });
             return;
         }
     });

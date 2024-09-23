@@ -120,6 +120,10 @@ async function updateTicketStatus(req) {
 
     const ticketToBeUpdated = await getTicketById(ticket_id);
 
+    if(!ticketToBeUpdated) {
+        throw new Error(`Could not change ticket status: ticket with id of ${ticket_id} does not exist!`);
+    }
+
     if(ticketToBeUpdated.status !== 'pending') {
         throw new Error(`Could not change ticket status: ticket is already ${ticketToBeUpdated.status}`);
     }
@@ -127,17 +131,6 @@ async function updateTicketStatus(req) {
     let data = await changeTicketStatus(ticket_id, status, resolver_id);
 
     return data ? data : null;
-    // console.log(data)
-    // SAMPLE OUTPUT
-    // {
-    //     ticket_id: 'f1f38ad5-c704-4af3-a924-9662f1d94745',
-    //     employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89',
-    //     resolver_id: -1,
-    //     status: 'approved',
-    //     amount: '89.99',
-    //     description: 'Bought a new keyboard',
-    //     creation_date: 1726768383
-    //   }
 }
 
 module.exports = {
