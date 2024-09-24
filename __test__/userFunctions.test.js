@@ -69,6 +69,28 @@ describe('User Function Tests', () => {
         expect(queryUserByUsername).toHaveBeenCalled();
     });
 
+    test('registerUser should throw an Error when trying to register without a username', () => {
+        const mockReqBody = {
+            username: null,
+            password: 'david123'
+        };
+
+        expect(async () => {
+            await registerUser(mockReqBody);
+        }).rejects.toThrow('Could not login: missing username!');
+    });
+
+    test('registerUser should throw an Error when trying to register without a password', () => {
+        const mockReqBody = {
+            username: 'david123',
+            password: null
+        };
+
+        expect(async () => {
+            await registerUser(mockReqBody);
+        }).rejects.toThrow('Could not login: missing password!');
+    });
+
     // successful login of Employee account
     test('login should return a User with a role property of Employee', async () => {
         const reqBody = {
@@ -123,7 +145,7 @@ describe('User Function Tests', () => {
         expect(async () => {
             await login(reqBody);
         }).rejects.toThrow();
-    })
+    });
 
     // failed login
     test('login should throw an Error when trying to login with a wrong password', async () => {
@@ -143,5 +165,27 @@ describe('User Function Tests', () => {
         expect(async () => {
             await login(reqBody);
         }).rejects.toThrow();
-    })
-});
+    });
+
+    test('login should throw an Error when trying to login without a username', () => {
+        const mockReqBody = {
+            username: null,
+            password: 'lorem'
+        };
+
+        expect(async () => {
+            await login(mockReqBody);
+        }).rejects.toThrow('Could not login: missing username!');
+    });
+
+    test('login should throw an Error when trying to login without a password', () => {
+        const mockReqBody = {
+            username: 'lorem',
+            password: null
+        };
+
+        expect(async () => {
+            await login(mockReqBody);
+        }).rejects.toThrow('Could not login: missing password!');
+    });
+})
