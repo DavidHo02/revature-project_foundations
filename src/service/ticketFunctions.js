@@ -80,9 +80,9 @@ async function getTicketsByStatus(reqQuery) {
     }
 
     let data = await queryTicketsByStatus(status);
-    if(!data) {
-        return false;
-    }
+    // if(!data) {
+    //     return false;
+    // }
 
     return data;
 }

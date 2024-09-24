@@ -1,5 +1,5 @@
 const { Ticket } = require('../src/models/ticket');
-const { createTicket, queryTicketsByStatus, queryTicketsByUserId, getTicketById } = require('../src/repository/ticketDAO');
+const { createTicket, queryTicketsByStatus, queryTicketsByUserId, getTicketById, changeTicketStatus } = require('../src/repository/ticketDAO');
 const { submitTicket, getTicketsByStatus, getTicketsByUserId, updateTicketStatus } = require('../src/service/ticketFunctions');
 
 jest.mock('../src/repository/ticketDAO', () => {
@@ -11,6 +11,7 @@ jest.mock('../src/repository/ticketDAO', () => {
         queryTicketsByStatus: jest.fn(),
         queryTicketsByUserId: jest.fn(),
         getTicketById: jest.fn(),
+        changeTicketStatus: jest.fn()
     }
 });
 
@@ -58,7 +59,7 @@ describe('Ticket Service Tests', () => {
         expect(result).toHaveProperty('ticket_id');
     });
 
-    test('submitTicket should throw an error when trying to submit a ticket with missing required parameter(s)', async () => {
+    test('submitTicket should throw an error when trying to submit a ticket with a missing amount', async () => {
         const reqBody = {
             employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89',
             description: 'test',
@@ -68,6 +69,42 @@ describe('Ticket Service Tests', () => {
         expect(async () => {
             await submitTicket(reqBody, '52caac7a-e48f-4587-9eac-c87422f4ba89');
         }).rejects.toThrow(new Error('Could not submit ticket: missing reimbursement amount!'));
+    });
+
+    test('submitTicket should throw an error when trying to submit a ticket with a missing employee_id', async () => {
+        const mockReqBody = {
+            employee_id: null,
+            description: 'test',
+            amount: 89.99
+        }
+
+        expect(async () => {
+            await submitTicket(mockReqBody, '52caac7a-e48f-4587-9eac-c87422f4ba89');
+        }).rejects.toThrow(new Error('Could not submit ticket: missing ticket\'s employee id!'));
+    });
+
+    test('submitTicket should throw an error when trying to submit a ticket with a missing description', async () => {
+        const mockReqBody = {
+            employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89',
+            description: null,
+            amount: 89.99
+        }
+
+        expect(async () => {
+            await submitTicket(mockReqBody, '52caac7a-e48f-4587-9eac-c87422f4ba89');
+        }).rejects.toThrow(new Error('Could not submit ticket: missing ticket\'s description!'));
+    });
+
+    test('submitTicket should throw an error when trying to submit a ticket with a missing description', async () => {
+        const mockReqBody = {
+            employee_id: '52caac7a-e48f-4587-9eac-c87422f4ba89',
+            description: 'test',
+            amount: 89.99
+        }
+
+        expect(async () => {
+            await submitTicket(mockReqBody, 'differentID');
+        }).rejects.toThrow(new Error('Could not submit ticket: employee ID from auth token does not match the request body\'s employee ID'));
     });
 
     test('getTicketsByStatus should return an empty list ', async () => {
@@ -111,6 +148,16 @@ describe('Ticket Service Tests', () => {
         expect(result).toHaveLength(2);
     });
 
+    test('getTicketsByStatus should throw an Error when status is null', () => {
+        const mockReqQuery = {
+            status: null
+        };
+
+        expect(async () => {
+            await getTicketsByStatus(mockReqQuery);
+        }).rejects.toThrow('Could not get tickets: status query is missing');
+    });
+
     test('getTicketsByUserId should return an empty list ', async () => {
         queryTicketsByUserId.mockReturnValueOnce([]);
 
@@ -136,6 +183,49 @@ describe('Ticket Service Tests', () => {
 
         expect(result).toHaveLength(1);
     });
+
+    test('updateTicketStatus should return ', async () => {
+        const mockReq = {
+            body: {
+                status: 'approved'
+            },
+            params: {
+                ticket_id: '0e5b18fe-6fe9-402b-afb5-bfc4be652582'
+            },
+            user: {
+                employee_id: '1ea231df-a30e-424f-be5b-ff8c3c7db266',
+                username: 'admin',
+                role: 'Manager',
+                iat: 1727117261,
+                exp: 1727203661
+            }
+        };
+
+        getTicketById.mockReturnValueOnce({
+            ticket_id: '0e5b18fe-6fe9-402b-afb5-bfc4be652582',
+            creation_date: 0,
+            amount: 89.99,
+            description: 'lorem',
+            employee_id: 'mockEmployeeID',
+            resolver_id: '-1',
+            status: 'pending'
+        });
+
+        changeTicketStatus.mockReturnValueOnce({
+            ticket_id: '0e5b18fe-6fe9-402b-afb5-bfc4be652582',
+            creation_date: 0,
+            amount: 89.99,
+            description: 'lorem',
+            employee_id: 'mockEmployeeID',
+            resolver_id: '1ea231df-a30e-424f-be5b-ff8c3c7db266',
+            status: 'approved'
+        });
+
+        const result = await updateTicketStatus(mockReq);
+
+        expect(result).toHaveProperty('resolver_id', '1ea231df-a30e-424f-be5b-ff8c3c7db266');
+        expect(result).toHaveProperty('status', 'approved');
+    })
 
     test('updateTicketStatus should throw an error when trying to update a ticket with a missing update field', async () => {
         const mockReq = {
