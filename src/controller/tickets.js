@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const { decodeJWT, authenticateAdminToken, submitTicket, getTicketsByStatus, updateTicketStatus } = require('../service/ticketFunctions');
+const { decodeJWT, authenticateAdminToken } = require('../util/authentication');
+
+const { submitTicket, getTicketsByStatus, updateTicketStatus } = require('../service/ticketFunctions');
 
 router.route('/tickets/:ticket_id')
     .get(function (req, res, next) {

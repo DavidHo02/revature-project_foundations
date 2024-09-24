@@ -117,10 +117,10 @@ async function changeTicketStatus(ticket_id, newStatus, resolver_id) {
     const ticket = await getTicketById(ticket_id);
 
     // if it does not exist, EXIT
-    if(!ticket) {
-        // console.log('ticket does not exist');
-        return false;
-    }
+    // if(!ticket) {
+    //     // console.log('ticket does not exist');
+    //     return false;
+    // }
 
     // if it does exist, check if the status is pending
     // if the status is not pending, EXIT

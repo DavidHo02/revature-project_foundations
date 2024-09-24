@@ -3,10 +3,11 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+const { decodeJWT } = require('../util/authentication');
 const { logger } = require('../util/logger');
 
 const { registerUser, login } = require('../service/userFunctions');
-const { decodeJWT, getTicketsByUserId } = require('../service/ticketFunctions');
+const { getTicketsByUserId } = require('../service/ticketFunctions');
 
 const secretKey = process.env.JWT_SECRET_KEY;
 
