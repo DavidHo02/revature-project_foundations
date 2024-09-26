@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+const { logger } = require('../util/logger');
+
 const secretKey = process.env.JWT_SECRET_KEY;
 
 /**
@@ -13,12 +15,12 @@ async function decodeJWT(token) {
         return user;
     } catch(err) {
         logger.error(err);
+        throw new Error('jwt expired!');
     }
 }
 
 async function authenticateAdminToken(req, res, next) {
     // Bearer token
-
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(" ")[1];
 
@@ -27,14 +29,22 @@ async function authenticateAdminToken(req, res, next) {
         return;
     }
 
-    const user = await decodeJWT(token);
-    if(user.role !== 'Manager') {
-        res.status(403).json({message: 'Forbidden Access'});
+    try {
+        const user = await decodeJWT(token);
+
+        if(user.role !== 'Manager') {
+            res.status(403).json({message: 'Forbidden Access'});
+            return;
+        }
+
+        req.user = user;
+        next();
+        return;
+    } catch(err) {
+        logger.error(err);
+        res.status(400).json({ message: 'JWT expired'});
         return;
     }
-
-    req.user = user;
-    next();
 }
 
 module.exports = {

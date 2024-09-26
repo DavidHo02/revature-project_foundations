@@ -22,7 +22,7 @@ router.route('/register')
             // logger.info(`Registration of new user`);
             res.status(201).json({ message: 'Registration complete!' })
             return;
-        } catch(err) {
+        } catch (err) {
             res.status(400).json({ message: err.message });
             return;
         }
@@ -76,20 +76,26 @@ router.route('/users/:userID/tickets')
             res.status(401).json({ message: 'Missing auth token' });
             return;
         }
-        const user = await decodeJWT(token);
 
-        const userID = req.params.userID;
+        try {
+            const user = await decodeJWT(token);
+            const userID = req.params.userID;
 
-        if (user.employee_id !== userID) {
-            res.status(403).json({ message: 'You are not the user' })
+            if (user.employee_id !== userID) {
+                res.status(403).json({ message: 'You are not the user' })
+                return;
+            }
+
+            // get all tickets where ticket.employee_id = userID
+            const data = await getTicketsByUserId(userID);
+
+            res.status(200).send(data);
+            return;
+        } catch (err) {
+            logger.error(err);
+            res.status(400).json({ message: err.message });
             return;
         }
-
-        // get all tickets where ticket.employee_id = userID
-        const data = await getTicketsByUserId(userID);
-
-        res.status(200).send(data);
-        return;
     })
 
 module.exports = router;

@@ -40,11 +40,10 @@ router.route('/tickets')
         if (!token) {
             res.status(401).json({ message: 'Missing auth token!' });
             return;
-        }
-
-        const user = await decodeJWT(token);
+        }        
 
         try {
+            const user = await decodeJWT(token);
             const result = await submitTicket(req.body, user.employee_id);
 
             res.status(201).json(result);
