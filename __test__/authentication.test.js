@@ -34,7 +34,7 @@ describe('Authentication Tests', () => {
         
         expect(async () => {
             await decodeJWT(mockToken);
-        }).rejects.toThrow(new Error('jwt expired!'));
+        }).rejects.toThrow(new Error('invalid jwt!'));
     });
 
     test('authenticateAdminToken should add a user attribute to req', async () => {

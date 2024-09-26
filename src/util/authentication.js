@@ -15,7 +15,7 @@ async function decodeJWT(token) {
         return user;
     } catch(err) {
         logger.error(err);
-        throw new Error('jwt expired!');
+        throw new Error('invalid jwt!');
     }
 }
 
@@ -42,7 +42,7 @@ async function authenticateAdminToken(req, res, next) {
         return;
     } catch(err) {
         logger.error(err);
-        res.status(400).json({ message: 'JWT expired'});
+        res.status(400).json({ message: err.message});
         return;
     }
 }

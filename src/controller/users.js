@@ -3,10 +3,10 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const { decodeJWT } = require('../util/authentication');
+const { decodeJWT, authenticateAdminToken } = require('../util/authentication');
 const { logger } = require('../util/logger');
 
-const { registerUser, login } = require('../service/userFunctions');
+const { registerUser, login, changeUserRole } = require('../service/userFunctions');
 const { getTicketsByUserId } = require('../service/ticketFunctions');
 
 const secretKey = process.env.JWT_SECRET_KEY;
@@ -72,7 +72,7 @@ router.route('/users/:userID/tickets')
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(" ")[1];
 
-        if (!token) {
+        if(!token) {
             res.status(401).json({ message: 'Missing auth token' });
             return;
         }
@@ -81,7 +81,7 @@ router.route('/users/:userID/tickets')
             const user = await decodeJWT(token);
             const userID = req.params.userID;
 
-            if (user.employee_id !== userID) {
+            if(user.employee_id !== userID) {
                 res.status(403).json({ message: 'You are not the user' })
                 return;
             }
@@ -96,6 +96,25 @@ router.route('/users/:userID/tickets')
             res.status(400).json({ message: err.message });
             return;
         }
-    })
+    });
+
+    router.route('/users/:userID')
+        .put(authenticateAdminToken, async function (req, res, next) {
+            if(!req.params.userID) {
+                res.status(400).json({ message: 'Missing employee ID in URL'});
+                return;
+            }
+
+            const { role } = req.body;
+            if(!role) {
+                res.status(400).json({ message: 'Missing role in request body'});
+                return;
+            }
+
+            const data = await changeUserRole(req.params.userID, role);
+
+            res.status(200).send(data);
+            return;
+        });
 
 module.exports = router;

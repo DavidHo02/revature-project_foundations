@@ -3,7 +3,7 @@ const uuid = require('uuid');
 const { logger } = require('../util/logger');
 
 const { User } = require('../models/user');
-const { createUser, queryUserByUsername } = require('../repository/userDAO');
+const { createUser, queryUserById, queryUserByUsername, updateUserRole } = require('../repository/userDAO');
 const { queryTicketsByUserId } = require('../repository/ticketDAO');
 
 async function registerUser(reqBody) {
@@ -65,7 +65,20 @@ async function login(reqBody) {
     return userObj;
 }
 
+async function changeUserRole(userId, newRole) {
+    const user = await queryUserById(userId);
+
+    if(!user) {
+        throw new Error(`Employee with id: ${userId} does not exist!`);
+    }
+
+    const data = await updateUserRole(user, newRole);
+
+    return data;
+}
+
 module.exports = {
     registerUser,
-    login
+    login,
+    changeUserRole
 }
