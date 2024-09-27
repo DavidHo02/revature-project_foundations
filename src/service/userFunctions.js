@@ -11,12 +11,12 @@ async function registerUser(reqBody) {
 
     // check if username is empty
     if (!username) {
-        throw new Error('Could not login: missing username!');
+        throw new Error('Could not register: missing username!');
     }
 
     // check if password is empty
     if(!password) {
-        throw new Error('Could not login: missing password!');
+        throw new Error('Could not register: missing password!');
     }
 
     // check if username already exists
