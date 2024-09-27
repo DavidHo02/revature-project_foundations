@@ -1,6 +1,7 @@
 const { DynamoDBClient, QueryCommand } = require('@aws-sdk/client-dynamodb');
 const {
     DynamoDBDocumentClient,
+    PutCommand,
     UpdateCommand,
 } = require('@aws-sdk/lib-dynamodb');
 const { unmarshall } = require('@aws-sdk/util-dynamodb'); // used to convert from DynamoDB JSON format to regular JSON format
