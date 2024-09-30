@@ -2,26 +2,26 @@
 This is an app for a ticket reimbursement system for a company.
 
 # Features
-Register an Employee Account
+- Register an Employee Account
     - A new user can register a new Employee account
-Login
+- Login
     - Returning users can login to their registered accounts
-View Tickets
+- View Tickets
     - If their role is Employee, users can see their previous submitted tickets
     - If their role is Manager, users can see all pending tickets submitted by Employees
-Submit a Ticket
+- Submit a Ticket
     - Users can submit a ticket
-Process a Ticket
+- Process a Ticket
     - Managers can approve/deny a pending ticket
-Change Employee Role
+- Change Employee Role
     - Managers can change Employees to become Managers
 
 
 # Used Technologies
-NodeJS
-DynamoDB
-AWS SDK
-ExpressJS
-Jest
-Postman
-JWT
+- NodeJS
+- DynamoDB
+- AWS SDK
+- ExpressJS
+- Jest
+- Postman
+- JWT
