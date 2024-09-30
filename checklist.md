@@ -1,3 +1,0 @@
-implemented /register
-
-implemented /login
